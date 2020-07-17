@@ -35,7 +35,7 @@ const questions = [
         name: "email",
         type: "input"
     }
-    
+
 
 ];
 
@@ -51,68 +51,85 @@ function moreQuestions(role, questionText, questionName, previousData) {
     inquirer.prompt(question).then((answer) => {
 
         const { name, id, email } = previousData;
-        
+
         let employeeData;
-        
-        switch(role) {
+
+        switch (role) {
             case 'Manager':
-                employeeData = new Manager(name, id, email, answer);
-            break;
+                employeeData = new Manager(name, id, email, answer[questionName]);
+                break;
             case 'Engineer':
-                employeeData = new Engineer(name, id, email, answer);
-            break;
+                employeeData = new Engineer(name, id, email, answer[questionName]);
+                break;
             case 'Intern':
-                employeeData = new Intern(name, id, email, answer);
-            break;
+                employeeData = new Intern(name, id, email, answer[questionName]);
+                break;
         }
         employeeInfo.push(employeeData);
-        console.log("this is employee info",employeeInfo)
-        writeHTMLtoFile() 
+        console.log("this is employee info", employeeInfo)
+        moreTeamates()
 
     })
-    
-}
 
+}
+function moreTeamates() {
+    const extraQuestion = [
+        {
+            message: "would you like to add another team member",
+            name: "new_member",
+            type: "confirm",
+
+        },
+    ]
+    inquirer.prompt(extraQuestion).then((answer) => {
+        if (answer.new_member === true) {
+            init();
+        }
+        else {
+            const html = render(employeeInfo);
+            writeHTMLtoFile(html);
+        }
+    })
+}
 function init() {
 
     inquirer.prompt(questions)
         .then((inquirerData) => {
             const { role } = inquirerData;
             switch (role) {
-                case 'Manager':
-                    moreQuestions(role, "officeNumber", "Enter the Manager's office number?", inquirerData);
-                    break;
+
                 case 'Engineer':
                     moreQuestions(role, "github", "Enter the Engineer's Github profile username", inquirerData);
+                    break;
+                case 'Manager':
+                    moreQuestions(role, "officeNumber", "Enter the Manager's office number?", inquirerData);
                     break;
                 case 'Intern':
                     moreQuestions(role, "school", "Enter where the intern goes to school", inquirerData);
                     break;
             }
-            
-           
         })
         .catch((err) => {
             console.log(err);
         })
-       
-        
+
+
 }
 
 // const writeHTMLtoFile = (html) => {
-    const writeHTMLtoFile = () => {
-    
-        fs.writeFile(outputPath, render(employeeInfo), function (err) {
+const writeHTMLtoFile = () => {
 
-            if (err) {
-                return console.log(err);
-            }
+    fs.writeFile(outputPath, render(employeeInfo), function (err) {
 
-            console.log("Data successfully written to team.html file.");
+        if (err) {
+            return console.log(err);
+        }
 
-        });
-        
-    };
+        console.log("Data successfully written to team.html file.");
+
+    });
+
+};
 init();
 
 
